@@ -49,26 +49,83 @@ void setup() {
 
 
 void draw() {
-    PGraphics pg;
-    if (size == 1) {
-        pg = createSmallQR(width, height);
+    
+    PGraphics pg = null;
+    
+    if (type.equals("png")) {
+        
+        if (size == 1) {
+            pg = createSmallQR(width, height);
+        } else {
+            pg = createQR(width, height, true);
+        }
+        if (size == 1) {
+            pg.save("./" + type + "S/qr" + count + "." + type);
+        } else if (size == 2) {
+            pg.save("./" + type + "M/qr" + count + "." + type);
+        } else if (size == 3) {
+            pg.save("./" + type + "L/qr" + count + "." + type);
+        }
+        image(pg, 0, 0, 1000, 1000);
+        count++;
     } else {
-        pg = createQR(width, height, true);
+        
+        PShape svg = null;
+        if (size == 1) {
+            svg = createSmallQRSvg(width, height);
+            pg = createGraphics(width, height, SVG, "./" + type + "S/qr" + count + "." + type);
+        } else {
+            // ... create the SVG for other sizes ...
+        }
+        
+        // Create the SVG file
+        String filename;
+        if (size == 1) {
+            filename = "./" + type + "S/qr" + count + "." + type;
+        } else if (size == 2) {
+            filename = "./" + type + "M/qr" + count + "." + type;
+        } else if (size == 3) {
+            filename = "./" + type + "L/qr" + count + "." + type;
+        } else {
+            throw new RuntimeException("Invalid size: " + size);
+        }
+        
+        pg.beginDraw();
+        pg.shape(svg, 0, 0, 1000, 1000);
+        pg.endDraw();
+        pg.dispose(); // this is necessary to actually write the SVG file
+        
+        shape(svg, 0, 0, 1000, 1000);
+        count++;
     }
-    if (size == 1) {
-        pg.save("./" + type + "S/qr" + count + "." + type);
-    } else if (size == 2) {
-        pg.save("./" + type + "M/qr" + count + "." + type);
-    } else if (size == 3) {
-        pg.save("./" + type + "L/qr" + count + "." + type);
-    }
-    image(pg, 0, 0, 1000, 1000);
-    count++;
 }
+
+PShape createSmallQRSvg(int width, int height) {
+    PShape svg = createShape(GROUP);
+
+    System.out.println("Creating small QR: " + halfSVG.size());
+    int i = (int) random(0, halfSVG.size());
+    PShape img = halfSVG.get(i);
+    img.scale(width/img.width, height/img.height);
+    svg.addChild(img);
+
+    int r = (int) random(0, 4);
+    if (r == 3) {
+        PShape overlay = fullOverlaySVG.get((int) random(0, fullOverlaySVG.size()));
+        overlay.scale(width/overlay.width, height/overlay.height);
+        svg.addChild(overlay);
+    }
+
+    return svg;
+}
+
+
+
 
 PGraphics createSmallQR(int width, int height) {
     PGraphics pg = createGraphics(width, height);
     background(255);
+    
     pg.beginDraw();
     System.out.println("Creating small QR: " + half.size());
     int i = (int) random(0, half.size());
@@ -76,7 +133,7 @@ PGraphics createSmallQR(int width, int height) {
     pg.image(img, 0, 0, width, height);
     
     int r = (int) random(0, 4);
-    if (r == 3) {
+    if (r >= 2) {
         pg.image(fullOverlay.get((int) random(0, fullOverlay.size())), 0,0, width, height);
     }
     pg.endDraw();
@@ -144,7 +201,7 @@ ArrayList<PImage> loadImagesFromFolder(String folderPath) {
             imageFiles.add(file);
         }
     }
-   
+    
     ArrayList<PImage> images = new ArrayList<PImage>();
     for (int i = 0; i < imageFiles.size(); i++) {
         images.add(loadImage(imageFiles.get(i).getAbsolutePath()));
@@ -157,19 +214,18 @@ ArrayList<PShape> loadSVGsFromFolder(String folderPath) {
     File[] listOfFiles = folder.listFiles();
     System.out.println(folderPath);
     
-    //Filter outnon-image files
+    // Filter out non-SVG files
     ArrayList<File> svgFiles = new ArrayList<File>();
     for (File file : listOfFiles) {
         if (file.isFile() && file.getName().toLowerCase().endsWith(".svg")) {
             svgFiles.add(file);
         }
     }
-   System.out.println(svgFiles.size());
-
+    System.out.println(svgFiles.size());
+    
     ArrayList<PShape> svgs = new ArrayList<PShape>();
     for (int i = 0; i < svgFiles.size(); i++) {
-        System.out.println(svgFiles.get(i).getAbsolutePath());
-        PShape svg = loadShape("C:/Users/bill/Desktop/Code/qr/500x500_SVG/Bungie_Single_Black_500x500-01.svg");
+        PShape svg = loadShape(svgFiles.get(i).getAbsolutePath()); // Use loadShape() function
         svgs.add(svg);
     }
     return svgs;

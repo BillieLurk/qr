@@ -16,6 +16,8 @@ int fullSize = 1000;
 int size = 1; //1, 2, 3,
 String type = "svg"; //png, svg
 
+//windows
+/*
 String halfPng = "C:/Users/bill/Desktop/Code/qr/500x500px";
 String fullOverlayPng = "C:/Users/bill/Desktop/Code/qr/1000x1000_overlay";
 String halfOverlayPng = "C:/Users/bill/Desktop/Code/qr/500x500_overlay";
@@ -23,6 +25,17 @@ String halfOverlayPng = "C:/Users/bill/Desktop/Code/qr/500x500_overlay";
 String halfSvg = "C:/Users/bill/Desktop/Code/qr/500x500_SVG";
 String fullOverlaySvg = "C:/Users/bill/Desktop/Code/qr/1000x1000_Overlay_SVG";
 String halfOverlaySvg = "C:/Users/bill/Desktop/Code/qr/500x500_Overlay_SVG";
+*/
+
+//linux
+String halfPng = "/home/default/Desktop/code/qr/500x500px";
+String fullOverlayPng = "/home/default/Desktop/code/qr/1000x1000_overlay";
+String halfOverlayPng = "/home/default/Desktop/code/qr/500x500_overlay";
+
+String halfSvg = "/home/default/Desktop/code/qr/500x500_SVG";
+String fullOverlaySvg = "/home/default/Desktop/code/qr/1000x1000_Overlay_SVG";
+String halfOverlaySvg = "/home/default/Desktop/code/qr/500x500_Overlay_SVG";
+
 
 PGraphics base;
 PShape baseSvg;
@@ -69,33 +82,13 @@ void draw() {
         image(pg, 0, 0, 1000, 1000);
         count++;
     } else {
-        
-        PShape svg = null;
-        if (size == 1) {
-            svg = createSmallQRSvg(width, height);
-            pg = createGraphics(width, height, SVG, "./" + type + "S/qr" + count + "." + type);
-        } else {
-            // ... create the SVG for other sizes ...
-        }
-        
-        // Create the SVG file
-        String filename;
-        if (size == 1) {
-            filename = "./" + type + "S/qr" + count + "." + type;
-        } else if (size == 2) {
-            filename = "./" + type + "M/qr" + count + "." + type;
-        } else if (size == 3) {
-            filename = "./" + type + "L/qr" + count + "." + type;
-        } else {
-            throw new RuntimeException("Invalid size: " + size);
-        }
-        
-        pg.beginDraw();
-        pg.shape(svg, 0, 0, 1000, 1000);
-        pg.endDraw();
-        pg.dispose(); // this is necessary to actually write the SVG file
-        
-        shape(svg, 0, 0, 1000, 1000);
+        background(255);
+        PShape svg = loadShape("/home/default/Desktop/code/qr/test.svg"  );
+        PGraphics recorder = createGraphics(width, height, SVG, "qr" + count + ".svg");
+        beginRecord(recorder);
+        shape(svg, 0, 0, width, height);
+        endRecord();
+      
         count++;
     }
 }
@@ -106,18 +99,26 @@ PShape createSmallQRSvg(int width, int height) {
     System.out.println("Creating small QR: " + halfSVG.size());
     int i = (int) random(0, halfSVG.size());
     PShape img = halfSVG.get(i);
-    img.scale(width/img.width, height/img.height);
-    svg.addChild(img);
+    
+    // Scale the 'img' shape to fit the width and height
+    
+    
+    
 
     int r = (int) random(0, 4);
-    if (r == 3) {
+    if (r > 2 && true) {
         PShape overlay = fullOverlaySVG.get((int) random(0, fullOverlaySVG.size()));
-        overlay.scale(width/overlay.width, height/overlay.height);
-        svg.addChild(overlay);
+   
+        // Scale the 'overlay' shape to fit the width and height
+        //overlay.scale(width / overlay.width, height / overlay.height);
+        //overlay.scale(0.5);
+        img.addChild(overlay);
     }
 
-    return svg;
+    return img;
 }
+
+
 
 
 
